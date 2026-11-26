@@ -175,14 +175,38 @@ function setupHeroParallax() {
 }
 
 function setupPaperReveal() {
-  if (!('IntersectionObserver' in window)) return;
-  const observer = new IntersectionObserver((entries) => {
-    for (const { target, isIntersecting } of entries) {
-      target.classList.toggle('is-in-view', isIntersecting);
-    }
-  });
+  const papers = [...document.querySelectorAll('.paper')].map((element) => ({ element, progress: null }));
+  let frame = 0;
 
-  for (const paper of document.querySelectorAll('.paper')) observer.observe(paper);
+  function update() {
+    frame = 0;
+    if (reducedMotion.matches) return;
+
+    const viewportBottom = document.documentElement.clientHeight;
+    const progressValues = papers.map(({ element }) => {
+      const { top, height } = element.getBoundingClientRect();
+      const entranceDistance = Math.min(136, Math.max(72, height * .45));
+      return smoothstep((viewportBottom - top) / entranceDistance).toFixed(3);
+    });
+
+    for (const [index, paper] of papers.entries()) {
+      const progress = progressValues[index];
+      if (paper.progress === progress) continue;
+      paper.progress = progress;
+      paper.element.style.setProperty('--paper-reveal', progress);
+    }
+  }
+
+  function schedule() {
+    if (!frame) frame = requestAnimationFrame(update);
+  }
+
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', schedule, { passive: true });
+  window.addEventListener('pageshow', schedule);
+  reducedMotion.addEventListener('change', schedule);
+  document.fonts?.ready.then(schedule);
+  update();
 }
 
 function schedulePointerUpdate() {
