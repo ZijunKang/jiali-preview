@@ -185,7 +185,7 @@ function setupPaperReveal() {
     const viewportBottom = document.documentElement.clientHeight;
     const progressValues = papers.map(({ element }) => {
       const { top, height } = element.getBoundingClientRect();
-      const entranceDistance = Math.min(136, Math.max(72, height * .45));
+      const entranceDistance = Math.min(220, Math.max(144, height * .75));
       return smoothstep((viewportBottom - top) / entranceDistance).toFixed(3);
     });
 

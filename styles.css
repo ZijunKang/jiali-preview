@@ -269,9 +269,9 @@ strong { font-weight: 650; }
 
 @media (prefers-reduced-motion: no-preference) {
   .paper:not(:focus-within) > * {
-    opacity: calc(.68 + .32 * var(--paper-reveal, 1));
-    translate: 0 calc(14px * (1 - var(--paper-reveal, 1)));
-    transition: opacity 220ms ease-out, translate 220ms ease-out;
+    opacity: calc(.26 + .74 * var(--paper-reveal, 1));
+    translate: 0 calc(36px * (1 - var(--paper-reveal, 1)));
+    transition: opacity 240ms ease-out, translate 240ms ease-out;
   }
 }
 
