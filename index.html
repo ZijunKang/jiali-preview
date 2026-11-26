@@ -14,8 +14,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;550;600;650&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=1381a662fb">
-  <script src="./script.js?v=41b8108bfb" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=7a7723d064">
+  <script src="./script.js?v=4c8c2c467e" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#name">Skip to content</a>
@@ -27,7 +27,6 @@
           <button class="theme-toggle" type="button" aria-label="Dark theme" aria-pressed="false" title="Switch color theme">
             <span class="theme-icon" aria-hidden="true"><span></span></span>
           </button>
-          <a class="mobile-about" href="#about">About</a>
           <a href="#publications">Publications</a>
         </nav>
 
@@ -61,8 +60,9 @@
         </div>
 
         <section class="about-layout" id="about" aria-label="About Jiali Cui" tabindex="-1">
-          <div class="portrait">
+          <div class="portrait" data-particle-art="portrait">
             <img src="./assets/jiali-cui-line-art-v2.png" width="504" height="439" alt="Line drawing of Jiali Cui" loading="lazy" decoding="async">
+            <canvas aria-hidden="true"></canvas>
           </div>
           <div class="about-research">
             <h2 class="label" id="research-heading">Research interests</h2>

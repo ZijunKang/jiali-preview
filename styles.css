@@ -69,7 +69,6 @@ strong { font-weight: 650; }
 
 :is(.section-nav a, .back-to-top) { text-decoration: none; }
 :is(.section-nav a, .back-to-top):is(:hover, :focus-visible) { text-decoration: underline; }
-.section-nav .mobile-about { display: none; }
 
 .theme-toggle {
   position: relative;
@@ -188,7 +187,10 @@ strong { font-weight: 650; }
   align-self: center;
   rotate: var(--art-angle);
 }
-[data-particle-art] { position: relative; }
+[data-particle-art] {
+  position: relative;
+  touch-action: pan-y pinch-zoom;
+}
 .handwriting { aspect-ratio: 1006 / 362; }
 .handwriting::before {
   content: "";
@@ -222,6 +224,7 @@ strong { font-weight: 650; }
 }
 
 [data-particle-art] canvas, .portrait img { filter: var(--art-inversion); }
+.portrait:not([data-rendered]) canvas { visibility: hidden; }
 
 [data-particle-art][data-rendered] img {
   clip-path: inset(50%);
@@ -257,7 +260,6 @@ strong { font-weight: 650; }
 }
 
 .section > h2 {
-  position: relative;
   font-size: clamp(1.625rem, 2.5vw, 2rem);
   font-weight: 550;
   letter-spacing: -.055em;
@@ -265,20 +267,15 @@ strong { font-weight: 650; }
   margin-bottom: 28px;
 }
 
-.entry-particles {
-  position: absolute;
-  inset: -20px auto auto -20px;
-  pointer-events: none;
-  filter: var(--art-inversion);
+@media (prefers-reduced-motion: no-preference) {
+  .paper.is-in-view:not(:focus-within) > * {
+    animation: paper-enter 340ms cubic-bezier(.2, .65, .3, 1);
+  }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  [data-ink-entry]:not(:focus-within) > :not(.entry-particles),
-  .paper[data-ink-entry]:not(:focus-within)::before {
-    opacity: var(--entry-ink, 0);
-  }
-
-  [data-ink-entry]:focus-within > .entry-particles { visibility: hidden; }
+@keyframes paper-enter {
+  from { opacity: .68; translate: 0 14px; }
+  to { opacity: 1; translate: 0 0; }
 }
 
 .about-layout {
@@ -547,7 +544,6 @@ body.has-character-cursor, body.has-character-cursor :is(a, summary, .theme-togg
 
 @media (max-width: 650px) {
   .section-nav { min-height: 54px; gap: 22px; }
-  .section-nav .mobile-about { display: inline; }
   .hero-layout {
     grid-template-columns: minmax(0, 1fr);
     gap: 42px;
@@ -576,6 +572,15 @@ body.has-character-cursor, body.has-character-cursor :is(a, summary, .theme-togg
     pointer-events: none;
   }
   .paper { --paper-line-offset: -12px; grid-template-columns: minmax(0, 1fr); gap: 11px; }
+  .paper + .paper::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: -16px;
+    border-top: 1px solid var(--foreground);
+    opacity: .14;
+    pointer-events: none;
+  }
   .paper-image {
     width: min(100%, 320px);
     max-height: 150px;

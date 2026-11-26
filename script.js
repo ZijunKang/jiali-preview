@@ -16,7 +16,7 @@ if (matchMedia('(any-pointer: fine)').matches) prepareCharacters();
 setupThemeToggle();
 setupSectionScroll();
 setupHeroParallax();
-setupContentParticles();
+setupPaperReveal();
 
 reducedMotion.addEventListener('change', () => {
   if (reducedMotion.matches) {
@@ -173,140 +173,15 @@ function setupHeroParallax() {
   update();
 }
 
-function setupContentParticles() {
+function setupPaperReveal() {
   if (!('IntersectionObserver' in window)) return;
-  const blocks = document.querySelectorAll('.section > h2, .year, .paper');
   const observer = new IntersectionObserver((entries) => {
     for (const { target, isIntersecting } of entries) {
-      const repeat = target.matches('.section > h2');
-      if (!isIntersecting) {
-        if (repeat) {
-          target.querySelector('.entry-particles')?.remove();
-          target.style.removeProperty('--entry-ink');
-          target.dataset.inkEntry = 'pending';
-        }
-      } else if (target.dataset.inkEntry === 'pending') {
-        if (!repeat) observer.unobserve(target);
-        if (reducedMotion.matches) delete target.dataset.inkEntry;
-        else assembleContent(target);
-      }
+      target.classList.toggle('is-in-view', isIntersecting);
     }
-  }, { rootMargin: '0px 0px -8% 0px' });
+  });
 
-  for (const block of blocks) {
-    block.dataset.inkEntry = 'pending';
-    observer.observe(block);
-  }
-}
-
-function paintContentMask(context, block, bounds, padding) {
-  for (const image of block.querySelectorAll('img')) {
-    if (!image.complete || !image.naturalWidth) continue;
-    const rect = image.getBoundingClientRect();
-    const contained = getComputedStyle(image).objectFit === 'contain';
-    const scale = Math.min(rect.width / image.naturalWidth, rect.height / image.naturalHeight);
-    const width = contained ? image.naturalWidth * scale : rect.width;
-    const height = contained ? image.naturalHeight * scale : rect.height;
-    context.drawImage(image, padding + rect.left - bounds.left + (rect.width - width) / 2,
-      padding + rect.top - bounds.top, width, height);
-  }
-
-  const fonts = new Map();
-  context.textBaseline = 'middle';
-  function paintWord(word, rect, source) {
-    if (!word || !rect.width || !rect.height) return;
-    if (!fonts.has(source)) {
-      const style = getComputedStyle(source);
-      fonts.set(source, `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`);
-    }
-    context.font = fonts.get(source);
-    context.fillText(word, padding + rect.left - bounds.left,
-      padding + rect.top - bounds.top + rect.height / 2, rect.width);
-  }
-
-  const prepared = block.querySelectorAll('.interactive-word');
-  if (prepared.length) {
-    for (const word of prepared) {
-      const text = Array.from(word.children, (character) => character.firstChild.textContent).join('');
-      paintWord(text, word.getBoundingClientRect(), word.parentElement);
-    }
-    return;
-  }
-
-  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
-  const range = document.createRange();
-  while (walker.nextNode()) {
-    const node = walker.currentNode;
-    if (node.parentElement.closest('[aria-hidden="true"]')) continue;
-    for (const match of node.data.matchAll(/\S+/g)) {
-      range.setStart(node, match.index);
-      range.setEnd(node, match.index + match[0].length);
-      paintWord(match[0], range.getBoundingClientRect(), node.parentElement);
-    }
-  }
-}
-
-function assembleContent(block) {
-  const bounds = block.getBoundingClientRect();
-  const padding = 20;
-  const width = Math.ceil(bounds.width) + padding * 2;
-  const maskHeight = Math.ceil(bounds.height) + padding * 2;
-  const height = maskHeight + 88;
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d', { willReadFrequently: true });
-
-  if (!context || !bounds.width || !bounds.height) {
-    delete block.dataset.inkEntry;
-    return;
-  }
-
-  canvas.width = width;
-  canvas.height = height;
-  paintContentMask(context, block, bounds, padding);
-  const pixels = context.getImageData(0, 0, width, maskHeight).data;
-  const spacing = bounds.width * bounds.height > 60000 ? 3 : 2;
-  const particles = sampleInk(pixels, width, maskHeight, true, spacing);
-  context.clearRect(0, 0, width, height);
-
-  if (!particles.length) {
-    delete block.dataset.inkEntry;
-    return;
-  }
-
-  canvas.className = 'entry-particles';
-  canvas.setAttribute('aria-hidden', 'true');
-  block.dataset.inkEntry = 'assembling';
-  block.append(canvas);
-
-  const startedAt = performance.now();
-  const duration = block.matches('h2, .year') ? 580 : 690;
-  function paint(now) {
-    if (!canvas.isConnected) return;
-    const progress = Math.min(1, (now - startedAt) / duration);
-    if (reducedMotion.matches || progress === 1) {
-      block.style.removeProperty('--entry-ink');
-      delete block.dataset.inkEntry;
-      canvas.remove();
-      return;
-    }
-
-    const textOpacity = smoothstep((progress - .68) / .28);
-    const particleOpacity = smoothstep(progress / .16) * (1 - textOpacity);
-    block.style.setProperty('--entry-ink', textOpacity);
-    context.clearRect(0, 0, width, height);
-
-    for (const dot of particles) {
-      const delay = .15 * (1 - dot.y / maskHeight) + Math.abs(dot.driftX) * .004;
-      const distance = 1 - smoothstep((progress - delay) / .66);
-      const x = dot.x + distance * dot.driftX;
-      const y = dot.y + distance * (48 + Math.abs(dot.driftY) * 1.7);
-      context.globalAlpha = particleOpacity * dot.opacity;
-      context.fillRect(x, y, dot.size * .8, dot.size * .8);
-    }
-    requestAnimationFrame(paint);
-  }
-
-  requestAnimationFrame(paint);
+  for (const paper of document.querySelectorAll('.paper')) observer.observe(paper);
 }
 
 function schedulePointerUpdate() {
@@ -471,12 +346,14 @@ function setupParticleBrush(wrapper) {
   const context = canvas.getContext('2d');
   if (!context) return () => {};
 
-  const padding = 64;
+  const isPortrait = wrapper.dataset.particleArt === 'portrait';
+  const padding = isPortrait ? 0 : 64;
   const angle = (parseFloat(getComputedStyle(wrapper).getPropertyValue('--art-angle')) || 0) * Math.PI / 180;
   const cosine = Math.cos(angle);
   const sine = Math.sin(angle);
-  const sourceWidth = Number(image.getAttribute('width'));
-  const sourceHeight = Number(image.getAttribute('height'));
+  const samplingScale = isPortrait ? .7 : 1;
+  const sourceWidth = Math.round(Number(image.getAttribute('width')) * samplingScale);
+  const sourceHeight = Math.round(Number(image.getAttribute('height')) * samplingScale);
   const artWidth = sourceWidth + padding * 2;
   const artHeight = sourceHeight + padding * 2;
   let particles = [];
@@ -486,6 +363,8 @@ function setupParticleBrush(wrapper) {
   let restingInk = null;
   let displayWidth = 0;
   let displayHeight = 0;
+  let touchId = null;
+  let releaseTimer = 0;
 
   function paint(dirty, atRest = false) {
     const scaleX = canvas.width / artWidth;
@@ -540,18 +419,20 @@ function setupParticleBrush(wrapper) {
     const sourceContext = source.getContext('2d');
     if (!sourceContext) return;
     sourceContext.drawImage(image, padding, padding, sourceWidth, sourceHeight);
-    drawChalkFrame(sourceContext, artWidth, artHeight);
+    if (!isPortrait) drawChalkFrame(sourceContext, artWidth, artHeight);
     const pixels = sourceContext.getImageData(0, 0, source.width, source.height).data;
-    particles = sampleInk(pixels, source.width, source.height);
+    particles = sampleInk(pixels, source.width, source.height, isPortrait);
     if (!particles.length) return;
 
     sizeCanvas();
-    wrapper.setAttribute('data-rendered', '');
+    if (!isPortrait) wrapper.setAttribute('data-rendered', '');
     new ResizeObserver(sizeCanvas).observe(wrapper);
   }
 
-  if (image.complete) readSource();
-  else image.addEventListener('load', readSource, { once: true });
+  if (!isPortrait) {
+    if (image.complete) readSource();
+    else image.addEventListener('load', readSource, { once: true });
+  }
 
   function tick(now) {
     const elapsed = Math.min(48, Math.max(1, now - previousTime));
@@ -604,35 +485,72 @@ function setupParticleBrush(wrapper) {
       else paint(dirty);
     }
     frame = moving ? requestAnimationFrame(tick) : 0;
+    if (isPortrait && !brush && !moving) wrapper.removeAttribute('data-rendered');
   }
 
-  function moveBrush(position) {
-    if (reducedMotion.matches || !particles.length || !displayWidth || !displayHeight) return;
+  function moveBrush(position, fromTouch = false) {
+    if (reducedMotion.matches || (!fromTouch && touchId !== null)) return;
     let nextBrush = null;
     if (position) {
       const rect = wrapper.getBoundingClientRect();
+      // An untouched portrait has no particle canvas size yet.
+      const width = displayWidth || wrapper.clientWidth;
+      const height = displayHeight || wrapper.clientHeight;
       const dx = position.x - rect.left - rect.width / 2;
       const dy = position.y - rect.top - rect.height / 2;
-      const x = dx * cosine + dy * sine + displayWidth / 2;
-      const y = -dx * sine + dy * cosine + displayHeight / 2;
-      if (x >= 0 && x <= displayWidth && y >= 0 && y <= displayHeight) {
+      const x = dx * cosine + dy * sine + width / 2;
+      const y = -dx * sine + dy * cosine + height / 2;
+      if (width && height && x >= 0 && x <= width && y >= 0 && y <= height) {
+        if (isPortrait && !particles.length) readSource();
+        if (!particles.length) return;
+        const mouseRadius = Math.min(26, width * (isPortrait ? .18 : .065));
+        const radius = fromTouch ? Math.min(24, width * .2) : mouseRadius;
         nextBrush = {
-          x: x * artWidth / displayWidth,
-          y: y * artHeight / displayHeight,
-          radius: Math.min(26, displayWidth * .065) * artWidth / displayWidth,
+          x: x * artWidth / width,
+          y: y * artHeight / height,
+          radius: radius * artWidth / width,
         };
       }
     }
     if (!nextBrush && !brush) return;
     brush = nextBrush;
+    if (isPortrait && brush) wrapper.setAttribute('data-rendered', '');
     if (!frame) {
       previousTime = performance.now();
       frame = requestAnimationFrame(tick);
     }
   }
 
+  wrapper.addEventListener('pointerdown', (event) => {
+    if (event.pointerType !== 'touch' || !event.isPrimary || reducedMotion.matches) return;
+    clearTimeout(releaseTimer);
+    touchId = event.pointerId;
+    moveBrush({ x: event.clientX, y: event.clientY }, true);
+  });
+
+  wrapper.addEventListener('pointermove', (event) => {
+    if (event.pointerId === touchId) moveBrush({ x: event.clientX, y: event.clientY }, true);
+  });
+
+  function endTouch(event) {
+    if (event.pointerId !== touchId) return;
+    touchId = null;
+    if (event.type === 'pointerup') {
+      // Keep a quick tap visible long enough for the first few animation frames.
+      releaseTimer = setTimeout(() => moveBrush(null, true), 90);
+    } else {
+      moveBrush(null, true);
+    }
+  }
+
+  wrapper.addEventListener('pointerup', endTouch);
+  wrapper.addEventListener('pointercancel', endTouch);
+  wrapper.addEventListener('lostpointercapture', endTouch);
+
   reducedMotion.addEventListener('change', () => {
     if (!reducedMotion.matches) return;
+    clearTimeout(releaseTimer);
+    touchId = null;
     cancelAnimationFrame(frame);
     frame = 0;
     brush = null;
@@ -642,6 +560,7 @@ function setupParticleBrush(wrapper) {
       dot.fade = 0;
     }
     if (restingInk) context.putImageData(restingInk, 0, 0);
+    if (isPortrait) wrapper.removeAttribute('data-rendered');
   });
   return moveBrush;
 }
@@ -661,8 +580,9 @@ function drawChalkFrame(context, width, height) {
   context.stroke();
 }
 
-function sampleInk(pixels, width, height, spacing = 2) {
+function sampleInk(pixels, width, height, darkInk) {
   const particles = [];
+  const spacing = 2;
   let seed = 31;
 
   function random() {
@@ -673,7 +593,8 @@ function sampleInk(pixels, width, height, spacing = 2) {
   for (let y = 0; y < height; y += spacing) {
     for (let x = 0; x < width; x += spacing) {
       const index = (y * width + x) * 4;
-      const coverage = pixels[index] * pixels[index + 3] / 255;
+      const contrast = darkInk ? 255 - pixels[index] : pixels[index];
+      const coverage = contrast * pixels[index + 3] / 255;
       if (coverage < 34) continue;
 
       particles.push({
