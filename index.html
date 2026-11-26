@@ -14,93 +14,90 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;550;600;650&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css">
-  <script src="./script.js" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=1381a662fb">
+  <script src="./script.js?v=77a361179c" defer></script>
 </head>
 <body>
-  <a class="skip-link" href="#about">Skip to content</a>
+  <a class="skip-link" href="#name">Skip to content</a>
 
-  <header class="hero" id="top" aria-labelledby="name">
-    <div class="page-width">
-      <nav class="section-nav" aria-label="On this page">
-        <button class="theme-toggle" type="button" aria-label="Dark theme" aria-pressed="false" title="Switch color theme">
-          <span class="theme-icon" aria-hidden="true"><span></span></span>
-        </button>
-        <a href="#about">About</a>
-        <a href="#publications">Publications</a>
-      </nav>
+  <main>
+    <section class="hero" id="top" aria-labelledby="name">
+      <div class="page-width">
+        <nav class="section-nav" aria-label="On this page">
+          <button class="theme-toggle" type="button" aria-label="Dark theme" aria-pressed="false" title="Switch color theme">
+            <span class="theme-icon" aria-hidden="true"><span></span></span>
+          </button>
+          <a class="mobile-about" href="#about">About</a>
+          <a href="#publications">Publications</a>
+        </nav>
 
-      <div class="hero-layout">
-        <div class="identity">
-          <h1 id="name">Jiali Cui</h1>
-          <p class="role">Senior Research Scientist<br><span class="role-organization">Futurewei Technology</span></p>
+        <div class="hero-layout">
+          <div class="identity">
+            <h1 id="name" tabindex="-1">Jiali Cui</h1>
+            <p class="role">Senior Research Scientist<br><span class="role-organization">Futurewei Technology</span></p>
 
-          <nav class="profile-links" aria-label="Professional links">
-            <a href="https://jcui1224.github.io/files/Jiali_Cui_Resume.pdf" target="_blank" rel="noopener">CV</a>
-            <a href="https://scholar.google.com/citations?hl=en&amp;user=dDBTlNAAAAAJ" target="_blank" rel="noopener">Google Scholar</a>
-            <details class="contact">
-              <summary>Email</summary>
-              <div class="contact-links">
-                <a href="mailto:jcui2@futurewei.com"><span>Work</span><span>jcui2@futurewei.com</span></a>
-                <a href="mailto:jcui7@stevens.edu"><span>Academic</span><span>jcui7@stevens.edu</span></a>
-              </div>
-            </details>
-            <a href="https://github.com/jcui1224" target="_blank" rel="noopener">GitHub</a>
-            <a href="https://www.linkedin.com/in/jiali-cui-184874228" target="_blank" rel="noopener">LinkedIn</a>
-          </nav>
+            <nav class="profile-links" aria-label="Professional links">
+              <a href="https://jcui1224.github.io/files/Jiali_Cui_Resume.pdf" target="_blank" rel="noopener">CV</a>
+              <a href="https://scholar.google.com/citations?hl=en&amp;user=dDBTlNAAAAAJ" target="_blank" rel="noopener">Google Scholar</a>
+              <details class="contact">
+                <summary>Email</summary>
+                <div class="contact-links">
+                  <a href="mailto:jcui2@futurewei.com"><span>Work</span><span>jcui2@futurewei.com</span></a>
+                  <a href="mailto:jcui7@stevens.edu"><span>Academic</span><span>jcui7@stevens.edu</span></a>
+                </div>
+              </details>
+              <a href="https://github.com/jcui1224" target="_blank" rel="noopener">GitHub</a>
+              <a href="https://www.linkedin.com/in/jiali-cui-184874228" target="_blank" rel="noopener">LinkedIn</a>
+            </nav>
+          </div>
+
+          <figure class="quote">
+            <div class="handwriting" data-particle-art="light">
+              <img src="./assets/feynman.png" width="878" height="234" alt="What I cannot create, I do not understand.">
+              <canvas aria-hidden="true"></canvas>
+            </div>
+            <figcaption>Richard Feynman</figcaption>
+          </figure>
         </div>
 
-        <figure class="quote">
-          <div class="handwriting" data-particle-art="light">
-            <img src="./assets/feynman.png" width="878" height="234" alt="What I cannot create, I do not understand.">
+        <section class="about-layout" id="about" aria-label="About Jiali Cui" tabindex="-1">
+          <div class="portrait" data-particle-art="dark">
+            <img src="./assets/jiali-cui-line-art-v2.png" width="504" height="439" alt="Line drawing of Jiali Cui" loading="lazy" decoding="async">
             <canvas aria-hidden="true"></canvas>
           </div>
-          <figcaption>Richard Feynman</figcaption>
-        </figure>
-      </div>
-    </div>
-  </header>
+          <div class="about-research">
+            <h2 class="label" id="research-heading">Research interests</h2>
+            <p class="research-intro">I study probabilistic generative models <span class="intro-focus">that can understand the world.</span></p>
+            <ul class="research-list" aria-labelledby="research-heading">
+              <li>Latent variable generative models</li>
+              <li>Energy-based models</li>
+              <li>Diffusion models</li>
+              <li>Multimodal learning</li>
+            </ul>
+          </div>
 
-  <main class="page-width">
-    <section class="about section" id="about" aria-labelledby="about-heading">
-      <h2 id="about-heading"><span class="section-heading-text">About</span></h2>
-      <div class="about-layout">
-        <div class="portrait" data-particle-art="dark">
-          <img src="./assets/jiali-cui-line-art-v2.png" width="504" height="439" alt="Line drawing of Jiali Cui" loading="lazy" decoding="async">
-          <canvas aria-hidden="true"></canvas>
-        </div>
-        <div class="about-research">
-          <h3 class="label" id="research-heading">Research interests</h3>
-          <p class="research-intro">I study probabilistic generative models <span class="intro-focus">that can understand the world.</span></p>
-          <ul class="research-list" aria-labelledby="research-heading">
-            <li>Latent variable generative models</li>
-            <li>Energy-based models</li>
-            <li>Diffusion models</li>
-            <li>Multimodal learning</li>
-          </ul>
-        </div>
-
-        <div class="education" aria-labelledby="education-heading">
-          <h3 class="label" id="education-heading">Education</h3>
-          <ul class="education-list">
-            <li>
-              <div><strong>Ph.D. in Computer Science</strong><span>Stevens Institute of Technology</span></div>
-              <span class="education-date">2021–2026</span>
-            </li>
-            <li>
-              <div><strong>M.S. in Computer Science</strong><span>Stevens Institute of Technology</span></div>
-              <span class="education-date">2019–2021</span>
-            </li>
-            <li>
-              <div><strong>B.S. in Computer Science</strong><span>Harbin Institute of Technology</span></div>
-              <span class="education-date">2015–2019</span>
-            </li>
-          </ul>
-        </div>
+          <div class="education" aria-labelledby="education-heading">
+            <h2 class="label" id="education-heading">Education</h2>
+            <ul class="education-list">
+              <li>
+                <div><strong>Ph.D. in Computer Science</strong><span>Stevens Institute of Technology</span></div>
+                <span class="education-date">2021–2026</span>
+              </li>
+              <li>
+                <div><strong>M.S. in Computer Science</strong><span>Stevens Institute of Technology</span></div>
+                <span class="education-date">2019–2021</span>
+              </li>
+              <li>
+                <div><strong>B.S. in Computer Science</strong><span>Harbin Institute of Technology</span></div>
+                <span class="education-date">2015–2019</span>
+              </li>
+            </ul>
+          </div>
+        </section>
       </div>
     </section>
 
-    <section class="publications section" id="publications" aria-labelledby="publications-heading">
+    <section class="publications section page-width" id="publications" aria-labelledby="publications-heading">
       <h2 id="publications-heading"><span class="section-heading-text">Publications</span></h2>
 
       <div class="publication-group">
@@ -225,7 +222,10 @@
     </section>
   </main>
 
-  <footer class="page-width footer"><small>© 2026 Jiali Cui</small></footer>
+  <footer class="page-width footer">
+    <small>© 2026 Jiali Cui</small>
+    <a class="back-to-top" href="#top" aria-label="Back to top">Back to top <span aria-hidden="true">↑</span></a>
+  </footer>
   <div class="cursor-trail" aria-hidden="true"></div>
   <div class="character-cursor" hidden aria-hidden="true"></div>
 </body>

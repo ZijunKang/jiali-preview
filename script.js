@@ -71,10 +71,9 @@ function setupThemeToggle() {
 
 function setupSectionScroll() {
   const root = document.documentElement;
-  const about = document.querySelector('#about');
+  const hero = document.querySelector('#top');
   const publications = document.querySelector('#publications');
   const enabled = matchMedia('(any-pointer: fine) and (prefers-reduced-motion: no-preference)');
-  const tolerance = 3;
   const landingTolerance = 8;
   let lastWheelAt = -Infinity;
   let lastWheelAmount = 0;
@@ -95,59 +94,32 @@ function setupSectionScroll() {
     const now = performance.now();
     const gap = now - lastWheelAt;
     const wheelAmount = Math.abs(event.deltaY) * (event.deltaMode === 0 ? 1 : 16);
-    const previousAmount = lastWheelAmount;
-    const minimumPush = 7;
-    const startsGesture = gap >= 105 || wheelAmount >= Math.max(minimumPush, previousAmount * 1.8);
+    const startsGesture = gap >= 105 || wheelAmount >= Math.max(7, lastWheelAmount * 1.8);
     lastWheelAt = now;
     lastWheelAmount = wheelAmount;
     const direction = Math.sign(event.deltaY);
     const scrollY = window.scrollY;
     const publicationsOffset = parseFloat(getComputedStyle(publications).scrollMarginTop) || 0;
     const publicationsTop = Math.round(scrollY + publications.getBoundingClientRect().top - publicationsOffset);
-
-    if ((direction > 0 && scrollY >= publicationsTop - landingTolerance) ||
-        (direction < 0 && scrollY <= landingTolerance)) {
-      transition = null;
-      return;
-    }
+    const heroEnd = Math.max(0, Math.round(scrollY + hero.getBoundingClientRect().bottom - root.clientHeight));
 
     let destination = null;
-    let stagePosition = scrollY;
     if (transition) {
-      const elapsed = now - transition.startedAt;
-      const remaining = Math.abs(scrollY - transition.to);
-      const landed = remaining <= landingTolerance;
-      const arriving = !landed && elapsed < 1200;
+      const arriving = Math.abs(scrollY - transition.to) > landingTolerance && now - transition.startedAt < 1200;
       const sameDirection = direction === transition.direction;
-      const nearAbout = (landed || elapsed >= 220) && remaining <= 72 &&
-        transition.to > 0 && transition.to < publicationsTop;
-      // Accumulate a renewed gentle push at About in either direction.
-      if (sameDirection && nearAbout) {
-        if (startsGesture) transition.followUp = wheelAmount;
-        else if (transition.followUp && wheelAmount >= previousAmount) transition.followUp += wheelAmount;
-      }
-      const freshGesture = nearAbout ? transition.followUp >= minimumPush : startsGesture && wheelAmount >= minimumPush;
-      if (sameDirection && (!freshGesture || (arriving && !nearAbout))) {
+      if (sameDirection && (arriving || !startsGesture)) {
         event.preventDefault();
         return;
       }
       if (!sameDirection && arriving) destination = transition.from;
-      if (landed || (sameDirection && nearAbout)) stagePosition = transition.to;
       transition = null;
     }
 
     if (destination === null) {
-      const aboutRect = about.getBoundingClientRect();
-      const aboutTop = Math.round(scrollY + aboutRect.top);
-      const aboutEnd = Math.max(aboutTop, Math.round(scrollY + aboutRect.bottom - root.clientHeight));
-      const aboutTopZone = aboutTop + (aboutEnd === aboutTop ? 48 : tolerance);
-
-      if (direction > 0) {
-        if (stagePosition < aboutTop - tolerance) destination = aboutTop;
-        else if (stagePosition >= aboutEnd - tolerance) destination = publicationsTop;
-      } else {
-        if (stagePosition <= aboutTopZone) destination = 0;
-        else if (stagePosition > aboutEnd + tolerance && stagePosition <= publicationsTop + tolerance) destination = aboutEnd;
+      if (direction > 0 && scrollY >= heroEnd - landingTolerance && scrollY < publicationsTop - landingTolerance) {
+        destination = publicationsTop;
+      } else if (direction < 0 && scrollY > heroEnd + landingTolerance && scrollY <= publicationsTop + landingTolerance) {
+        destination = heroEnd;
       }
     }
 
