@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Jiali Cui, Senior Research Scientist at Futurewei Technology. Research in probabilistic generative models and multimodal learning.">
   <title>Jiali Cui</title>
+  <script>
+    try {
+      if (localStorage.getItem('jiali-theme') === 'dark') document.documentElement.dataset.theme = 'dark';
+    } catch {}
+  </script>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" sizes="any">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +23,9 @@
   <header class="hero" id="top" aria-labelledby="name">
     <div class="page-width">
       <nav class="section-nav" aria-label="On this page">
+        <button class="theme-toggle" type="button" aria-label="Dark theme" aria-pressed="false" title="Switch color theme">
+          <span class="theme-icon" aria-hidden="true"><span></span></span>
+        </button>
         <a href="#about">About</a>
         <a href="#publications">Publications</a>
       </nav>
@@ -25,8 +33,7 @@
       <div class="hero-layout">
         <div class="identity">
           <h1 id="name">Jiali Cui</h1>
-          <p class="role">Senior Research Scientist<br>Futurewei Technology</p>
-          <p class="intro">I study probabilistic generative models that can understand the world.</p>
+          <p class="role">Senior Research Scientist<br><span class="role-organization">Futurewei Technology</span></p>
 
           <nav class="profile-links" aria-label="Professional links">
             <a href="https://jcui1224.github.io/files/Jiali_Cui_Resume.pdf" target="_blank" rel="noopener">CV</a>
@@ -44,7 +51,7 @@
         </div>
 
         <figure class="quote">
-          <div class="handwriting">
+          <div class="handwriting" data-particle-art="light">
             <img src="./assets/feynman.png" width="878" height="234" alt="What I cannot create, I do not understand.">
             <canvas aria-hidden="true"></canvas>
           </div>
@@ -56,14 +63,15 @@
 
   <main class="page-width">
     <section class="about section" id="about" aria-labelledby="about-heading">
-      <h2 id="about-heading">About</h2>
+      <h2 id="about-heading"><span class="section-heading-text">About</span></h2>
       <div class="about-layout">
-        <div>
-          <div class="about-profile">
-            <img class="portrait" src="./assets/jiali-cui.webp" width="420" height="560" alt="Jiali Cui" loading="lazy" decoding="async">
-            <p class="bio">I previously worked as a research scientist intern at Toyota Research Institute and Futurewei Technology.</p>
-          </div>
+        <div class="portrait" data-particle-art="dark">
+          <img src="./assets/jiali-cui-line-art-v2.png" width="504" height="439" alt="Line drawing of Jiali Cui" loading="lazy" decoding="async">
+          <canvas aria-hidden="true"></canvas>
+        </div>
+        <div class="about-research">
           <h3 class="label" id="research-heading">Research interests</h3>
+          <p class="research-intro">I study probabilistic generative models <span class="intro-focus">that can understand the world.</span></p>
           <ul class="research-list" aria-labelledby="research-heading">
             <li>Latent variable generative models</li>
             <li>Energy-based models</li>
@@ -93,10 +101,10 @@
     </section>
 
     <section class="publications section" id="publications" aria-labelledby="publications-heading">
-      <h2 id="publications-heading">Publications</h2>
+      <h2 id="publications-heading"><span class="section-heading-text">Publications</span></h2>
 
       <div class="publication-group">
-        <h3 class="year" id="year-2026">2026</h3>
+        <h3 class="year" id="year-2026"><span>2026</span></h3>
         <ul class="papers" aria-labelledby="year-2026">
           <li class="paper">
             <img class="paper-image" src="./assets/publications/cosmio-figure4.webp" width="560" height="218" alt="COSMIO examples of galaxy observations and cross-survey imputation" loading="lazy" decoding="async">
@@ -150,7 +158,7 @@
       </div>
 
       <div class="publication-group">
-        <h3 class="year" id="year-2024">2024</h3>
+        <h3 class="year" id="year-2024"><span>2024</span></h3>
         <ul class="papers" aria-labelledby="year-2024">
           <li class="paper">
             <img class="paper-image" src="./assets/publications/eccv24.webp" width="560" height="177" alt="" loading="lazy" decoding="async">
@@ -172,7 +180,7 @@
       </div>
 
       <div class="publication-group">
-        <h3 class="year" id="year-2023">2023</h3>
+        <h3 class="year" id="year-2023"><span>2023</span></h3>
         <ul class="papers" aria-labelledby="year-2023">
           <li class="paper">
             <img class="paper-image" src="./assets/publications/github-nips-2023-2.webp" width="560" height="112" alt="" loading="lazy" decoding="async">
@@ -202,7 +210,7 @@
       </div>
 
       <div class="publication-group">
-        <h3 class="year" id="year-2020">2020</h3>
+        <h3 class="year" id="year-2020"><span>2020</span></h3>
         <ul class="papers" aria-labelledby="year-2020">
           <li class="paper">
             <img class="paper-image" src="./assets/publications/github-nips-2023.webp" width="560" height="65" alt="" loading="lazy" decoding="async">
