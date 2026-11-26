@@ -71,6 +71,7 @@ strong { font-weight: 650; }
 .section-nav a:hover { text-decoration: underline; }
 
 .theme-toggle {
+  position: relative;
   display: grid;
   place-items: center;
   width: 44px;
@@ -83,7 +84,16 @@ strong { font-weight: 650; }
   cursor: pointer;
 }
 
-.theme-toggle:hover { opacity: .7; }
+.theme-toggle:is(:hover, :focus-visible)::after {
+  content: "";
+  position: absolute;
+  inset-inline: 12px;
+  bottom: 9px;
+  height: 1px;
+  background: currentColor;
+  pointer-events: none;
+}
+
 .theme-icon { position: relative; width: 20px; height: 20px; }
 .theme-icon::before, .theme-icon::after {
   content: "";
