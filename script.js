@@ -3,6 +3,7 @@ const introFocus = document.querySelector('.intro-focus');
 const cursor = document.querySelector('.character-cursor');
 const cursorTrail = document.querySelector('.cursor-trail');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const localParticleImages = location.protocol === 'file:' ? loadLocalParticleImages() : null;
 const moveBrushes = Array.from(document.querySelectorAll('[data-particle-art]'), setupParticleBrush);
 
 let pointer = null;
@@ -340,6 +341,17 @@ function prepareCharacters() {
   focusGlyphs = [...introFocus.querySelectorAll('.interactive-character')];
 }
 
+function loadLocalParticleImages() {
+  return new Promise((resolve) => {
+    // Classic scripts can bundle image bytes for file URLs without reading a local image through Canvas.
+    const script = document.createElement('script');
+    script.src = './local-particle-images.js';
+    script.onload = () => resolve(window.localParticleImageSources);
+    script.onerror = () => resolve(null);
+    document.head.append(script);
+  });
+}
+
 function setupParticleBrush(wrapper) {
   const image = wrapper.querySelector('img');
   const canvas = wrapper.querySelector('canvas');
@@ -365,6 +377,8 @@ function setupParticleBrush(wrapper) {
   let displayHeight = 0;
   let touchId = null;
   let releaseTimer = 0;
+  let sourceImage = localParticleImages ? null : image;
+  let sourceBlocked = false;
 
   function paint(dirty, atRest = false) {
     const scaleX = canvas.width / artWidth;
@@ -412,15 +426,22 @@ function setupParticleBrush(wrapper) {
   }
 
   function readSource() {
-    if (!image.naturalWidth) return;
+    if (sourceBlocked || !sourceImage?.naturalWidth) return;
     const source = document.createElement('canvas');
     source.width = artWidth;
     source.height = artHeight;
     const sourceContext = source.getContext('2d');
     if (!sourceContext) return;
-    sourceContext.drawImage(image, padding, padding, sourceWidth, sourceHeight);
+    sourceContext.drawImage(sourceImage, padding, padding, sourceWidth, sourceHeight);
     if (!isPortrait) drawChalkFrame(sourceContext, artWidth, artHeight);
-    const pixels = sourceContext.getImageData(0, 0, source.width, source.height).data;
+    let pixels;
+    try {
+      pixels = sourceContext.getImageData(0, 0, source.width, source.height).data;
+    } catch (error) {
+      if (error.name !== 'SecurityError') throw error;
+      sourceBlocked = true;
+      return;
+    }
     particles = sampleInk(pixels, source.width, source.height, isPortrait);
     if (!particles.length) return;
 
@@ -429,9 +450,23 @@ function setupParticleBrush(wrapper) {
     new ResizeObserver(sizeCanvas).observe(wrapper);
   }
 
-  if (!isPortrait) {
-    if (image.complete) readSource();
-    else image.addEventListener('load', readSource, { once: true });
+  function prepareSource(particleImage) {
+    sourceImage = particleImage;
+    if (isPortrait) return;
+    if (particleImage.complete) readSource();
+    else particleImage.addEventListener('load', readSource, { once: true });
+  }
+
+  if (localParticleImages) {
+    localParticleImages.then((sources) => {
+      const dataUrl = sources?.[image.getAttribute('src')];
+      if (!dataUrl) return;
+      const embeddedImage = new Image();
+      embeddedImage.src = dataUrl;
+      prepareSource(embeddedImage);
+    });
+  } else {
+    prepareSource(image);
   }
 
   function tick(now) {
