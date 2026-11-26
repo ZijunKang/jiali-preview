@@ -175,10 +175,10 @@ function setupHeroParallax() {
 
 function setupContentParticles() {
   if (!('IntersectionObserver' in window)) return;
-  const blocks = document.querySelectorAll('.section > h2, .about-layout, .year, .paper');
+  const blocks = document.querySelectorAll('.section > h2, .year, .paper');
   const observer = new IntersectionObserver((entries) => {
     for (const { target, isIntersecting } of entries) {
-      const repeat = target.matches('.section > h2, .about-layout');
+      const repeat = target.matches('.section > h2');
       if (!isIntersecting) {
         if (repeat) {
           target.querySelector('.entry-particles')?.remove();
@@ -471,16 +471,12 @@ function setupParticleBrush(wrapper) {
   const context = canvas.getContext('2d');
   if (!context) return () => {};
 
-  const darkInk = wrapper.dataset.particleArt === 'dark';
-  const padding = darkInk ? 0 : 64;
-  const radiusRatio = darkInk ? .18 : .065;
+  const padding = 64;
   const angle = (parseFloat(getComputedStyle(wrapper).getPropertyValue('--art-angle')) || 0) * Math.PI / 180;
   const cosine = Math.cos(angle);
   const sine = Math.sin(angle);
-  // Match the particle size and spacing on screen even though the portrait is narrower.
-  const samplingScale = darkInk ? .7 : 1;
-  const sourceWidth = Math.round(Number(image.getAttribute('width')) * samplingScale);
-  const sourceHeight = Math.round(Number(image.getAttribute('height')) * samplingScale);
+  const sourceWidth = Number(image.getAttribute('width'));
+  const sourceHeight = Number(image.getAttribute('height'));
   const artWidth = sourceWidth + padding * 2;
   const artHeight = sourceHeight + padding * 2;
   let particles = [];
@@ -544,9 +540,9 @@ function setupParticleBrush(wrapper) {
     const sourceContext = source.getContext('2d');
     if (!sourceContext) return;
     sourceContext.drawImage(image, padding, padding, sourceWidth, sourceHeight);
-    if (!darkInk) drawChalkFrame(sourceContext, artWidth, artHeight);
+    drawChalkFrame(sourceContext, artWidth, artHeight);
     const pixels = sourceContext.getImageData(0, 0, source.width, source.height).data;
-    particles = sampleInk(pixels, source.width, source.height, darkInk);
+    particles = sampleInk(pixels, source.width, source.height);
     if (!particles.length) return;
 
     sizeCanvas();
@@ -623,7 +619,7 @@ function setupParticleBrush(wrapper) {
         nextBrush = {
           x: x * artWidth / displayWidth,
           y: y * artHeight / displayHeight,
-          radius: Math.min(26, displayWidth * radiusRatio) * artWidth / displayWidth,
+          radius: Math.min(26, displayWidth * .065) * artWidth / displayWidth,
         };
       }
     }
@@ -665,7 +661,7 @@ function drawChalkFrame(context, width, height) {
   context.stroke();
 }
 
-function sampleInk(pixels, width, height, darkInk, spacing = 2) {
+function sampleInk(pixels, width, height, spacing = 2) {
   const particles = [];
   let seed = 31;
 
@@ -677,8 +673,7 @@ function sampleInk(pixels, width, height, darkInk, spacing = 2) {
   for (let y = 0; y < height; y += spacing) {
     for (let x = 0; x < width; x += spacing) {
       const index = (y * width + x) * 4;
-      const contrast = darkInk ? 255 - pixels[index] : pixels[index];
-      const coverage = contrast * pixels[index + 3] / 255;
+      const coverage = pixels[index] * pixels[index + 3] / 255;
       if (coverage < 34) continue;
 
       particles.push({
