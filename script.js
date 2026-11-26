@@ -377,8 +377,6 @@ function setupParticleBrush(wrapper) {
   let displayHeight = 0;
   let touchId = null;
   let releaseTimer = 0;
-  let sourceImage = localParticleImages ? null : image;
-  let sourceBlocked = false;
 
   function paint(dirty, atRest = false) {
     const scaleX = canvas.width / artWidth;
@@ -425,36 +423,33 @@ function setupParticleBrush(wrapper) {
     if (brush || frame) paint();
   }
 
-  function readSource() {
-    if (sourceBlocked || !sourceImage?.naturalWidth) return;
+  function readSource(particleImage) {
+    if (!particleImage.naturalWidth) return;
     const source = document.createElement('canvas');
     source.width = artWidth;
     source.height = artHeight;
     const sourceContext = source.getContext('2d');
     if (!sourceContext) return;
-    sourceContext.drawImage(sourceImage, padding, padding, sourceWidth, sourceHeight);
+    sourceContext.drawImage(particleImage, padding, padding, sourceWidth, sourceHeight);
     if (!isPortrait) drawChalkFrame(sourceContext, artWidth, artHeight);
     let pixels;
     try {
       pixels = sourceContext.getImageData(0, 0, source.width, source.height).data;
     } catch (error) {
       if (error.name !== 'SecurityError') throw error;
-      sourceBlocked = true;
       return;
     }
     particles = sampleInk(pixels, source.width, source.height, isPortrait);
     if (!particles.length) return;
 
     sizeCanvas();
-    if (!isPortrait) wrapper.setAttribute('data-rendered', '');
+    wrapper.setAttribute('data-rendered', '');
     new ResizeObserver(sizeCanvas).observe(wrapper);
   }
 
   function prepareSource(particleImage) {
-    sourceImage = particleImage;
-    if (isPortrait) return;
-    if (particleImage.complete) readSource();
-    else particleImage.addEventListener('load', readSource, { once: true });
+    if (particleImage.complete) readSource(particleImage);
+    else particleImage.addEventListener('load', () => readSource(particleImage), { once: true });
   }
 
   if (localParticleImages) {
@@ -520,24 +515,20 @@ function setupParticleBrush(wrapper) {
       else paint(dirty);
     }
     frame = moving ? requestAnimationFrame(tick) : 0;
-    if (isPortrait && !brush && !moving) wrapper.removeAttribute('data-rendered');
   }
 
   function moveBrush(position, fromTouch = false) {
-    if (reducedMotion.matches || (!fromTouch && touchId !== null)) return;
+    if (reducedMotion.matches || (!fromTouch && touchId !== null) || !particles.length || !displayWidth || !displayHeight) return;
     let nextBrush = null;
     if (position) {
       const rect = wrapper.getBoundingClientRect();
-      // An untouched portrait has no particle canvas size yet.
-      const width = displayWidth || wrapper.clientWidth;
-      const height = displayHeight || wrapper.clientHeight;
+      const width = displayWidth;
+      const height = displayHeight;
       const dx = position.x - rect.left - rect.width / 2;
       const dy = position.y - rect.top - rect.height / 2;
       const x = dx * cosine + dy * sine + width / 2;
       const y = -dx * sine + dy * cosine + height / 2;
-      if (width && height && x >= 0 && x <= width && y >= 0 && y <= height) {
-        if (isPortrait && !particles.length) readSource();
-        if (!particles.length) return;
+      if (x >= 0 && x <= width && y >= 0 && y <= height) {
         const mouseRadius = Math.min(26, width * (isPortrait ? .18 : .065));
         const radius = fromTouch ? Math.min(24, width * .2) : mouseRadius;
         nextBrush = {
@@ -549,7 +540,6 @@ function setupParticleBrush(wrapper) {
     }
     if (!nextBrush && !brush) return;
     brush = nextBrush;
-    if (isPortrait && brush) wrapper.setAttribute('data-rendered', '');
     if (!frame) {
       previousTime = performance.now();
       frame = requestAnimationFrame(tick);
@@ -595,7 +585,6 @@ function setupParticleBrush(wrapper) {
       dot.fade = 0;
     }
     if (restingInk) context.putImageData(restingInk, 0, 0);
-    if (isPortrait) wrapper.removeAttribute('data-rendered');
   });
   return moveBrush;
 }
