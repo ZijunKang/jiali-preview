@@ -493,7 +493,7 @@ function setupParticleBrush(wrapper) {
     previousTime = now;
     const approach = 1 - Math.exp(-elapsed / 70);
     const settle = 1 - Math.exp(-elapsed / 125);
-    const radiusSquared = brush ? brush.radius ** 2 : 0;
+    const reachSquared = brush ? (brush.radius * 1.4) ** 2 : 0;
     let brushingInk = false;
     let moving = false;
     let dirty = null;
@@ -506,13 +506,16 @@ function setupParticleBrush(wrapper) {
         const dx = dot.x - brush.x;
         const dy = dot.y - brush.y;
         const distanceSquared = dx * dx + dy * dy;
-        if (distanceSquared < radiusSquared) {
-          brushingInk = true;
+        if (distanceSquared < reachSquared) {
           const distance = Math.sqrt(distanceSquared);
-          const influence = smoothstep(1 - distance / brush.radius);
+          const angle = Math.atan2(dy, dx);
+          const edge = .92 + .18 * Math.sin(3 * angle + .55) + .12 * Math.cos(5 * angle - 1.1) + .18 * dot.brushTexture;
+          const influence = smoothstep(1 - distance / (brush.radius * edge)) * (.78 + .22 * dot.brushTexture);
+          brushingInk ||= influence > 0;
           const push = brush.radius * .62 / (distance + 8);
-          offsetX = (dx * push + dot.driftX) * influence;
-          offsetY = (dy * push + dot.driftY) * influence;
+          const spread = influence * 1.15;
+          offsetX = (dx * push + dot.driftX) * spread;
+          offsetY = (dy * push + dot.driftY) * spread;
           fade = influence * .87;
         }
       }
@@ -554,7 +557,7 @@ function setupParticleBrush(wrapper) {
       const y = -dx * sine + dy * cosine + height / 2;
       if (x >= 0 && x <= width && y >= 0 && y <= height) {
         const mouseRadius = Math.min(26, width * (isPortrait ? .18 : .065));
-        const radius = fromTouch ? Math.min(24, width * .2) : mouseRadius;
+        const radius = 1.2 * (fromTouch ? Math.min(24, width * .2) : mouseRadius);
         nextBrush = {
           x: x * artWidth / width,
           y: y * artHeight / height,
@@ -652,6 +655,7 @@ function sampleInk(pixels, width, height, darkInk) {
         opacity: Math.min(1, ((coverage - 34) / 103) ** .69),
         driftX: (random() - .5) * 38,
         driftY: (random() - .5) * 27,
+        brushTexture: .5 + .5 * Math.sin(x * .2 + y * .1) * Math.cos(y * .24 - x * .15),
         offsetX: 0,
         offsetY: 0,
         fade: 0,
